@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User{
+  id String @id @default(uuid())
+  email String @unique
+  password String
+  accounts Account[]
+  categories Category[]
+  transactions Transaction[]
+  budgets Budget[]
+  notifications Notification[]
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Account{
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  name String
+  type String
+  balance Decimal @default(0)
+  transactions Transaction[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("accounts")
+}
+
+model Category{
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  name String
+  type TransactionType
+  subcategories Subcategory[]
+  transactions Transaction[]
+  budgets Budget[]
+  createdAt DateTime @default(now()) @map("created_at")
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("categories")
+}
+
+model Subcategory{
+  id String @id @default(uuid())
+  categoryId String @map("category_id")
+  name String
+  transactions Transaction[]
+  createdAt DateTime @default(now()) @map("created-at")
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@map("subcategories")
+}
+
+model Transaction{
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  accountId String @map("account_id")
+  categoryId String @map("category_id")
+  subcategoryId String? @map("subcategory_id")
+  amount Decimal
+  type TransactionType
+  description String?
+  date DateTime
+  createdAt DateTime @default(now()) @map("created_at")
+  user User @relation(fields: [userId], references: [id])
+  account Account @relation(fields: [accountId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+  subcategory Subcategory? @relation(fields: [subcategoryId], references: [id])
+
+  @@map("transactions")
+}
+
+model Budget{
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  categoryId String @map("category_id")
+  amount Decimal
+  period BudgetPeriod
+  startDate DateTime @map("start_date")
+  endDate DateTime @map("end_date")
+  createdAt DateTime @default(now()) @map("created_at")
+  user User @relation(fields: [userId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@map("budgets")
+}
+
+model Notification{
+  id String @id @default(uuid())
+  userId String @map("user_id")
+  message String
+  type NotificationType
+  read Boolean @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+enum TransactionType{
+  INCOME
+  EXPENSE
+}
+
+enum BudgetPeriod{
+  MONTHLY
+  YEARLY
+}
+
+enum NotificationType{
+  BUDGET_EXCEEDED
+  BUDGET_WARNING
+  LOW_BALANCE
+  TRANSACTION_ALERT
+}
