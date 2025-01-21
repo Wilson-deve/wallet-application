@@ -6,7 +6,7 @@ import { json } from "stream/consumers";
 const router = Router();
 
 //get monthly summary
-router.get("/monthly-summaty", async (req: Request, res, next) => {
+router.get("/monthly-summary", async (req: Request, res, next) => {
   try {
     const { year, month } = req.query;
     const startDate = new Date(Number(year), Number(month) - 1, 1);
