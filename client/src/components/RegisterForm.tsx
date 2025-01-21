@@ -2,8 +2,10 @@ import { Wallet } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 function RegisterForm() {
+  const { register } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -11,15 +13,28 @@ function RegisterForm() {
     confirmPassword: "",
   });
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
       toast.error("Password and confirm password must match");
       return;
     }
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
 
-    setLoading(true);
+    try {
+      setLoading(true);
+      await register(formData.email, formData.password);
+      toast.success("Registration successful");
+    } catch (error) {
+      toast.error("Registration failed");
+      console.error("Registration failed:", error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

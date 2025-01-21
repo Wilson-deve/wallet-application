@@ -9,7 +9,8 @@ export interface Account {
 export interface Category {
   id: string;
   name: string;
-  tyep: "expense" | "income";
+  type: "expense" | "income";
+  subcategories: { name: string }[];
   created_at: string;
 }
 
@@ -30,6 +31,8 @@ export interface Transaction {
   description?: string;
   date: string;
   created_at: string;
+  category?: Category;
+  account?: Account;
 }
 
 export interface Budget {
@@ -41,3 +44,8 @@ export interface Budget {
   end_date: string;
   created_at: string;
 }
+
+export type AccountCreation = Omit<Account, "id" | "created_at">;
+export type CategoryCreation = Omit<Category, "id" | "created_at">;
+export type TransactionCreation = Omit<Transaction, "id" | "created_at">;
+export type BudgetCreation = Omit<Budget, "id" | "created_at">;

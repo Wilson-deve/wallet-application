@@ -1,21 +1,29 @@
 import { Wallet } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import toast from "react-hot-toast";
 
 function LoginForm() {
+  const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    console.log(formData);
-    toast.success("Sign in success");
-    // setLoading(false);
+    try {
+      setLoading(true);
+      await login(formData.email, formData.password);
+      toast.success("Logged in successfully");
+    } catch (error) {
+      toast.error("Invalid credentials");
+      console.error("Login failed:", error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
